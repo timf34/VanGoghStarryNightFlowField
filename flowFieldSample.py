@@ -2,6 +2,7 @@ import pygame
 import numpy as np
 import random
 import math
+from noise import pnoise2
 
 # Initialize Pygame
 pygame.init()
@@ -18,6 +19,13 @@ black = (0, 0, 0)
 # Flow field resolution
 resolution = 20
 cols, rows = width // resolution, height // resolution
+
+# Perlin noise parameters
+# Adjust these parameters to change the noise characteristics
+perlin_scale = 0.1  # Scales the input coordinates. Smaller values will make the noise smoother.
+octaves = 5  # The number of passes, more passes mean more detail and longer calculation time.
+persistence = 0.5  # Amplitude of each successive octave relative to the one before it.
+lacunarity = 2.0  # Frequency of each successive octave relative to the one before it.
 
 
 # VectorField class
@@ -75,16 +83,24 @@ class Particle:
         if self.position[1] < 0: self.position[1] = height
 
 
-# Placeholder Perlin noise function
 def perlin_noise(x, y):
-    return np.sin(x * 0.1) * np.cos(y * 0.1)
+    # The noise function expects 3D input (x, y, z), where z is usually time or a constant
+    noise_val = pnoise2(x * perlin_scale,
+                        y * perlin_scale,
+                        octaves=octaves,
+                        persistence=persistence,
+                        lacunarity=lacunarity,
+                        repeatx=width,
+                        repeaty=height,
+                        base=0)
+    return noise_val
 
 
 def main():
     vector_field = VectorField()
     vector_field.generate()
 
-    particles = [Particle() for _ in range(100)]  # Create 100 particles
+    particles = [Particle() for _ in range(1000)]  # Create 100 particles
 
     clock = pygame.time.Clock()  # For controlling the frame rate
 
