@@ -60,15 +60,19 @@ class VectorField:
 class Particle:
     def __init__(self):
         self.position = np.random.rand(2) * [width, height]
-        self.velocity = np.random.rand(2) * 2 - 1
+        angle = random.uniform(0, 2 * math.pi)
+        self.velocity = np.array([math.cos(angle), math.sin(angle)]) * (random.random() * 2 - 1)
         self.acceleration = np.zeros(2)
-        self.max_speed = 2
+        self.max_speed = random.uniform(0.7, 3)
 
     def update(self):
         self.velocity += self.acceleration
         self.velocity = np.clip(self.velocity, -self.max_speed, self.max_speed)
         self.position += self.velocity
         self.acceleration *= 0
+        # Occasionally apply a small random force
+        if random.randint(0, 50) == 0:  # Adjust frequency as needed
+            self.apply_force(np.random.rand(2) * 0.5 - 0.25)  # Small random force
 
     def apply_force(self, force):
         self.acceleration += force
