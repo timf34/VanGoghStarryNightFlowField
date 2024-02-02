@@ -1,54 +1,36 @@
 import cv2
 import numpy as np
 
-from typing import List, Dict
 
-# Load the images
-image_path = 'images/StarryNight.jpg'  # Update this path
-image = cv2.imread(image_path)
+def load_image(image_path='images/StarryNight.jpg') -> np.ndarray:
+    image = cv2.imread(image_path)
+    image = cv2.resize(image, (800, 600))
+    return image
 
-# Resize the image
-image = cv2.resize(image, (800, 500))
 
-if image is None:
-    print(f"Error: Unable to load image at {image_path}")
-else:
-    # Proceed with processing
+def image_preprocessing(image: np.ndarray) -> np.ndarray:
+    # sourcery skip: inline-immediately-returned-variable
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    return blurred
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-# blurred = cv2.GaussianBlur(gray, (3, 3), 0)
 
-cv2.imshow("Gray", gray)
-# Show blurred image
-# cv2.imshow('Blurred', blurred)
+def edge_detection(image: np.ndarray) -> np.ndarray:
+    return cv2.Canny(image, 30, 150)
 
-edges = cv2.Canny(gray, threshold1=100, threshold2=200)
 
-# Display the edges
-cv2.imshow('Edges', edges)
+def main():
+    image_path = load_image()
+    cv2.imshow("Original Image", image_path)
 
-# Compute the gradient in x and y directions
-grad_x = cv2.Sobel(edges, cv2.CV_64F, 1, 0, ksize=5)
-grad_y = cv2.Sobel(edges, cv2.CV_64F, 0, 1, ksize=5)
+    preprocessed_image = image_preprocessing(image_path)
+    cv2.imshow("Preprocessed Image", preprocessed_image)
 
-# Display the gradients
-cv2.imshow('Gradient X', grad_x)
-cv2.imshow('Gradient Y', grad_y)
+    edge_detected_image = edge_detection(preprocessed_image)
+    cv2.imshow("Edge Detected Image", edge_detected_image)
 
-# Compute the direction of the gradient
-angle = np.arctan2(grad_y, grad_x)
-
-def draw_vectors(image, angle, step=10):
-    for y in range(0, image.shape[0], step):
-        for x in range(0, image.shape[1], step):
-            dx = int(np.cos(angle[y, x]) * step)
-            dy = int(np.sin(angle[y, x]) * step)
-            cv2.arrowedLine(image, (x, y), (x + dx, y + dy), (255, 0, 0), 1)
-    cv2.imshow('Vector Field', image)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
-# Visualize the vector field on a copy of the original image
-image_copy = image.copy()
-draw_vectors(image_copy, angle)
+
+if __name__ == "__main__":
+    main()
