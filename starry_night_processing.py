@@ -19,6 +19,12 @@ def edge_detection(image: np.ndarray) -> np.ndarray:
     return cv2.Canny(image, 30, 150)
 
 
+# Filter edges to connect them with erosion then dilation
+def connect_edges(image: np.ndarray) -> np.ndarray:
+    kernel = np.ones((3, 3), np.uint8)
+    return cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+
+
 def main():
     image_path = load_image()
     cv2.imshow("Original Image", image_path)
@@ -28,6 +34,9 @@ def main():
 
     edge_detected_image = edge_detection(preprocessed_image)
     cv2.imshow("Edge Detected Image", edge_detected_image)
+
+    connected_edges_image = connect_edges(edge_detected_image)
+    cv2.imshow("Connected Edges Image", connected_edges_image)
 
     cv2.waitKey(0)
 
