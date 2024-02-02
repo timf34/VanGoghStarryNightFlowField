@@ -19,10 +19,14 @@ def edge_detection(image: np.ndarray) -> np.ndarray:
     return cv2.Canny(image, 30, 150)
 
 
-# Filter edges to connect them with erosion then dilation
-def connect_edges(image: np.ndarray) -> np.ndarray:
-    kernel = np.ones((3, 3), np.uint8)
-    return cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+def filter_long_edges(edges: np.ndarray, min_length: float) -> np.ndarray:
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    long_edges = np.zeros_like(edges)
+    # Filter contours by length
+    for contour in contours:
+        if cv2.arcLength(contour, False) > min_length:
+            cv2.drawContours(long_edges, [contour], -1, 255, thickness=1)
+    return long_edges
 
 
 def main():
@@ -35,8 +39,8 @@ def main():
     edge_detected_image = edge_detection(preprocessed_image)
     cv2.imshow("Edge Detected Image", edge_detected_image)
 
-    connected_edges_image = connect_edges(edge_detected_image)
-    cv2.imshow("Connected Edges Image", connected_edges_image)
+    long_edge_image = filter_long_edges(edge_detected_image, min_length=100)
+    cv2.imshow("Long Edge Image", long_edge_image)
 
     cv2.waitKey(0)
 
