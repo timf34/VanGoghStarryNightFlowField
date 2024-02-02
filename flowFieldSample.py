@@ -38,6 +38,15 @@ class VectorField:
         row = np.clip(row, 0, rows - 1)
         return self.field[column, row]
 
+    def draw(self):
+        for i in range(cols):
+            for j in range(rows):
+                angle = math.atan2(self.field[i, j][1], self.field[i, j][0])
+                x0 = i * resolution + resolution // 2
+                y0 = j * resolution + resolution // 2
+                x1 = x0 + math.cos(angle) * 10
+                y1 = y0 + math.sin(angle) * 10
+                pygame.draw.line(screen, white, (x0, y0), (x1, y1), 1)
 
 # Particle class
 class Particle:
@@ -86,6 +95,8 @@ def main():
                 running = False
 
         screen.fill(black)  # Clear the screen
+
+        vector_field.draw()  # Draw the vector field
 
         # Update and show particles
         for particle in particles:
