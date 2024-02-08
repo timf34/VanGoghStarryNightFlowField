@@ -1,15 +1,11 @@
-"""
-File to get our vector field creation from an edge image correct (or what we want at least)
-"""
 import cv2
 import numpy as np
 import pygame
 
-
 class VectorField:
     def __init__(self, edge_image):
         self.edge_image = edge_image
-        self.height, self.width = edge_image.shape
+        self.height, self.width = edge_image.shape[:2]
         self.vector_field = np.zeros((self.height, self.width, 2))  # For storing vector (direction) at each point
         self.compute_gradients()
 
@@ -19,22 +15,19 @@ class VectorField:
         grad_y = cv2.Sobel(self.edge_image, cv2.CV_64F, 0, 1, ksize=5)
 
         # Calculate gradient magnitude and angle
-        magnitude = np.sqrt(grad_x ** 2 + grad_y ** 2)
+        magnitude = np.sqrt(grad_x**2 + grad_y**2)
         angle = np.arctan2(grad_y, grad_x)
 
         # Use a fixed lower threshold for edge detection
-        edge_threshold = 500  # Example threshold, adjust as needed
+        edge_threshold = 100  # Lowered threshold for better sensitivity
 
+        # Populate the vector field based on gradient information
         for y in range(self.height):
             for x in range(self.width):
-                # Directly use gradients where the magnitude exceeds a minimal threshold
-                # print(magnitude[y, x])
-                # print(angle[y, x])
                 if magnitude[y, x] > edge_threshold:
-                    self.vector_field[y, x, :] = [np.cos(angle[y, x]), np.sin(angle[y, x])]
+                    self.vector_field[y, x] = [np.cos(angle[y, x]), np.sin(angle[y, x])]
                 else:
-                    self.vector_field[y, x, :] = [0, 0]  # Set vector to null if not near an edge
-                # print(self.vector_field[y, x, :], "vector")
+                    self.vector_field[y, x] = [0, 0]  # Null vector if below threshold
 
     def visualize_vector_field_with_pygame(self):
         pygame.init()
@@ -49,31 +42,28 @@ class VectorField:
 
             screen.fill((0, 0, 0))  # Fill screen with black
 
-            for y in range(0, self.height, 10):
+            # Visualize vectors
+            for y in range(0, self.height, 10):  # Adjust step for performance/visibility
                 for x in range(0, self.width, 10):
                     vx, vy = self.vector_field[y, x]
-                    end_point = (int(x + vx * 10), int(y + vy * 10))
+                    # if vx != 0 or vy != 0:  # Draw if vector is non-zero
+                    scale = 5  # Adjust for visibility
+                    end_point = (int(x + vx * scale), int(y + vy * scale))
                     pygame.draw.line(screen, (255, 255, 255), (x, y), end_point)
 
             pygame.display.flip()
 
         pygame.quit()
 
-
 def main():
+    # Simple edge for demonstration
     image = np.zeros((500, 500), dtype=np.uint8)
-
-    # Create a diagonal edge for demonstration
-    for i in range(250):
-        for j in range(250):
-            if i == j:
-                image[i, j] = 255
+    cv2.line(image, (0, 0), (500, 500), 255, 10)  # Diagonal line with thickness
 
     cv2.imshow("image", image)
 
     vector_field_creator = VectorField(image)
     vector_field_creator.visualize_vector_field_with_pygame()
-
 
 if __name__ == "__main__":
     main()
