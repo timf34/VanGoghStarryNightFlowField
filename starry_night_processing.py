@@ -54,7 +54,6 @@ class VectorField:
         pygame.quit()
 
 
-
 def load_image(image_path='images/StarryNight.jpg') -> np.ndarray:
     image = cv2.imread(image_path)
     image = cv2.resize(image, (800, 600))
@@ -72,46 +71,26 @@ def edge_detection(image: np.ndarray) -> np.ndarray:
     return cv2.Canny(image, 30, 150)
 
 
-def filter_long_edges(edges: np.ndarray, min_length: float) -> np.ndarray:
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    long_edges = np.zeros_like(edges)
-    # Filter contours by length
-    for contour in contours:
-        if cv2.arcLength(contour, False) > min_length:
-            cv2.drawContours(long_edges, [contour], -1, 255, thickness=1)
-    return long_edges
-
-
 def main():
-    image_path = load_image()
-    cv2.imshow("Original Image", image_path)
-
-    preprocessed_image = image_preprocessing(image_path)
-    cv2.imshow("Preprocessed Image", preprocessed_image)
-
-    edge_detected_image = edge_detection(preprocessed_image)
-    cv2.imshow("Edge Detected Image", edge_detected_image)
-
-    # edge_detected_image = edge_detection(preprocessed_image)
-    # vector_field_creator = VectorField(edge_detected_image)
-    # vector_field_creator.create_uniform_points()
-    # vector_field_creator.visualize_vector_field()
-
-    # long_edge_image = filter_long_edges(edge_detected_image, min_length=100)
-    # cv2.imshow("Long Edge Image", long_edge_image)
-
-    # noise_image = np.random.randint(0, 256, (600, 800), dtype=np.uint8)
+    # image_path = load_image()
+    # cv2.imshow("Original Image", image_path)
     #
-    # # Apply edge detection to the random noise
-    # edge_detected_noise = cv2.Canny(noise_image, 100, 200)
-    # print(edge_detected_noise.shape)
+    # preprocessed_image = image_preprocessing(image_path)
+    # cv2.imshow("Preprocessed Image", preprocessed_image)
+    #
+    # edge_detected_image = edge_detection(preprocessed_image)
+    # cv2.imshow("Edge Detected Image", edge_detected_image)
+    image = np.zeros((500, 500), dtype=np.uint8)
 
-    # Visualize the edge detected noise image
-    # cv2.imshow("Edge Detected Noise Image", edge_detected_noise)
-    # cv2.waitKey(1)  # Use cv2.waitKey(1) to ensure the window gets refreshed
+    # Fill one half along the diagonal with 1s
+    for i in range(500):
+        for j in range(500):
+            if i == j:
+                image[i, j] = 255
 
     # Create and visualize the vector field based on the edge-detected random noise
-    vector_field_creator = VectorField(edge_detected_image)
+    cv2.imshow("image", image)
+    vector_field_creator = VectorField(image)
     vector_field_creator.create_uniform_points()
     vector_field_creator.visualize_vector_field_with_pygame()
 
