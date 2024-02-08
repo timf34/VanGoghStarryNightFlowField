@@ -1,6 +1,7 @@
-import cv2
 import numpy as np
+import cv2
 import pygame
+import math
 
 class VectorField:
     def __init__(self, edge_image):
@@ -17,6 +18,9 @@ class VectorField:
         # Calculate gradient magnitude and angle
         magnitude = np.sqrt(grad_x**2 + grad_y**2)
         angle = np.arctan2(grad_y, grad_x)
+
+        # Adjusting the angle to align with the edge direction
+        angle += np.pi / 2  # Rotate by 90 degrees
 
         # Use a fixed lower threshold for edge detection
         edge_threshold = 100  # Lowered threshold for better sensitivity
@@ -46,7 +50,6 @@ class VectorField:
             for y in range(0, self.height, 10):  # Adjust step for performance/visibility
                 for x in range(0, self.width, 10):
                     vx, vy = self.vector_field[y, x]
-                    # if vx != 0 or vy != 0:  # Draw if vector is non-zero
                     scale = 5  # Adjust for visibility
                     end_point = (int(x + vx * scale), int(y + vy * scale))
                     pygame.draw.line(screen, (255, 255, 255), (x, y), end_point)
@@ -60,7 +63,10 @@ def main():
     image = np.zeros((500, 500), dtype=np.uint8)
     cv2.line(image, (0, 0), (500, 500), 255, 10)  # Diagonal line with thickness
 
-    cv2.imshow("image", image)
+    # Display the original image
+    cv2.imshow("Edge Image", image)
+    # cv2.waitKey(0)  # Wait for a key press to close
+    # cv2.destroyAllWindows()
 
     vector_field_creator = VectorField(image)
     vector_field_creator.visualize_vector_field_with_pygame()
