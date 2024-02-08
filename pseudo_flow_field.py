@@ -64,8 +64,8 @@ def main():
     image = np.zeros((500, 500), dtype=np.uint8)
 
     # Create a diagonal edge for demonstration
-    for i in range(100):
-        for j in range(100):
+    for i in range(250):
+        for j in range(250):
             if i == j:
                 image[i, j] = 255
 
